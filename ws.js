@@ -6,7 +6,7 @@
  */
 window.DerivData = {};
 
-window.DerivData.simpleWs = (class SimpleWebSocket {
+window.DerivData.simpleWs = new (class SimpleWebSocket {
     constructor(url, pingInterval = 5000) {
         this.url = url;
         this.reqId = 0;
