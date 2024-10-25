@@ -1,15 +1,28 @@
-window.DerivSimpleWebsocketClass = (class SimpleWebSocket {
+/**
+ * this is simple websocket, 
+ * todo: needs to support subscriptions like the one here: https://github.com/deriv-com/deriv-app/tree/master/packages/api-v2/src/ws-client
+ * also, needs to be properly compiles and setup, 
+ * but for the sake of PoC this is good enough, 
+ */
+window.DerivData = {};
+
+window.DerivData.simpleWs = (class SimpleWebSocket {
     constructor(url, pingInterval = 5000) {
         this.url = url;
         this.reqId = 0;
         this.ws = new WebSocket(url);
         this.callbacks = {};
+        this.authorized = false;
 
         this.ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
             if (message.req_id && this.callbacks[message.req_id]) {
                 this.callbacks[message.req_id](message);
                 delete this.callbacks[message.req_id];
+
+                if (message.authorize) {
+                    this.authorized = true;
+                }
             }
         };
 
@@ -17,6 +30,10 @@ window.DerivSimpleWebsocketClass = (class SimpleWebSocket {
         this.pingInterval = setInterval(() => {
             this.ws.send(JSON.stringify({ ping: 1 }));
         }, pingInterval);
+    }
+
+    authorize(token) {
+        return this.request({ authorize: token });
     }
 
     request(data) {
