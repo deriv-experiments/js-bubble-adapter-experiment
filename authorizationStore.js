@@ -4,6 +4,7 @@
             this.wsClient = wsClient;
             this.authData = null;  // Cache for the authorization data!
             this.authPromise = null;  // Hold the promise to avoid duplicate calls.
+            this.readyPromise = null; // A promise that will resolve once authorization is done
         }
 
         async authorize(token) {
@@ -28,12 +29,22 @@
                 // Check if authorization succeeded.
                 if (response.authorize) {
                     this.authData = response;
+
+                    // Resolve the readyPromise since we're authorized.
+                    if (this.readyPromise) {
+                        this.readyPromise.resolve(this.authData);
+                    }
                 } else {
                     throw new Error('Authorization failed');
                 }
 
                 return this.authData;
             } catch (error) {
+                // If there's any error, reject the readyPromise (if it's being awaited)
+                if (this.readyPromise) {
+                    this.readyPromise.reject(error);
+                }
+
                 console.error('Authorization error:', error);
                 throw error;
             } finally {
@@ -42,9 +53,34 @@
             }
         }
 
-        // Clears cached authorization data.
+        // Returns a promise that resolves once authorized, or rejects if authorization fails
+        waitForAuthorization(token) {
+            if (this.authData) {
+                // Already authorized, return a resolved promise with the auth data.
+                return Promise.resolve(this.authData);
+            }
+
+            // If there's no readyPromise, create one
+            if (!this.readyPromise) {
+                // Create a new promise that can be resolved or rejected later
+                this.readyPromise = {};
+                this.readyPromise.promise = new Promise((resolve, reject) => {
+                    this.readyPromise.resolve = resolve;
+                    this.readyPromise.reject = reject;
+                });
+            }
+
+            // Call authorize to kickstart authorization if needed
+            this.authorize(token); // Don't await, we'll resolve properly!
+
+            // Return the readyPromise for consumer to await on!
+            return this.readyPromise.promise;
+        }
+
+        // Clears cached authorization data and resets readyPromise.
         clearCache() {
             this.authData = null;
+            this.readyPromise = null;  // Invalidate current ready promise if cache is cleared
         }
     }
 
