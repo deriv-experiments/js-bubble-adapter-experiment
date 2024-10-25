@@ -23,6 +23,7 @@
             this.ws.onmessage = (event) => {
                 const message = JSON.parse(event.data);
                 if (message.req_id && this.callbacks[message.req_id]) {
+                    console.log('>> resolving req_id with respons: ', message.req_id, message);
                     this.callbacks[message.req_id](message);
                     delete this.callbacks[message.req_id];
 
