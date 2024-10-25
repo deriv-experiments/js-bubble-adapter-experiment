@@ -46,5 +46,5 @@
     }
 
     window.DerivData = window.DerivData || {};
-    window.DerivData.authorizationStore = new AuthorizationStore(window.DerivData.simpleWs);
+    window.DerivData.authorizationStore = new AuthorizationStore(window.DerivData.simpleWS);
 })();
