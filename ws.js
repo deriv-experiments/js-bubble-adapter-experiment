@@ -29,7 +29,7 @@ window.DerivData.simpleWs = new (class SimpleWebSocket {
         // Automatically send a ping every pingInterval milliseconds
         this.pingInterval = setInterval(() => {
             this.ws.send(JSON.stringify({ ping: 1 }));
-        }, pingInterval);
+        }, 5000);
     }
 
     authorize(token) {
