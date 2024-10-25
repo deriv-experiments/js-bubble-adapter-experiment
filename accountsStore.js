@@ -45,6 +45,6 @@
         }
     }
 
-    window.DerivData = {};
+    window.DerivData = window.DerivData || {};
     window.DerivData.accountStore = new AccountStore(window.DerivData.simpleWs);
 })();
