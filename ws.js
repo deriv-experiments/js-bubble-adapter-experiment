@@ -7,10 +7,10 @@
 window.DerivData = {};
 
 window.DerivData.simpleWs = new (class SimpleWebSocket {
-    constructor(url, pingInterval = 5000) {
-        this.url = url;
+    constructor() {
+        this.url = "wss://green.derivws.com/websockets/v3?app_id=16929&l=EN&brand=deriv";
         this.reqId = 0;
-        this.ws = new WebSocket(url);
+        this.ws = new WebSocket(this.url);
         this.callbacks = {};
         this.authorized = false;
 
