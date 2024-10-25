@@ -7,22 +7,25 @@
         }
 
         async authorize(token) {
-            // Already authorized? Just serve the cached honey.
+            // Already authorized? Return cached data.
             if (this.authData) {
                 return this.authData;
             }
 
-            // If a request is already in-flight, chain onto it.
+            // If a request is already in-flight, return the promise.
             if (this.authPromise) {
                 return this.authPromise;
             }
 
             try {
-                // First-time authorization or cache busted, let's make the request.
+                // Wait for WebSocket connection to be ready before sending the authorization request.
+                await this.wsClient.waitForConnection();
+
+                // First-time authorization or cache busted, make the request.
                 this.authPromise = this.wsClient.authorize(token);
                 const response = await this.authPromise;
 
-                // Maybe you're authorized! Maybe you're not! Let's see what we caught.
+                // Check if authorization succeeded.
                 if (response.authorize) {
                     this.authData = response;
                 } else {
@@ -34,12 +37,12 @@
                 console.error('Authorization error:', error);
                 throw error;
             } finally {
-                // Whether we succeed or crash, clear the promise.
+                // Clear the promise, regardless of the outcome.
                 this.authPromise = null;
             }
         }
 
-        // If you really have to freshen up the cache
+        // Clears cached authorization data.
         clearCache() {
             this.authData = null;
         }

@@ -1,10 +1,3 @@
-/**
- * this is simple websocket, 
- * todo: needs to support subscriptions like the one here: https://github.com/deriv-com/deriv-app/tree/master/packages/api-v2/src/ws-client
- * also, needs to be properly compiles and setup, 
- * but for the sake of PoC this is good enough, 
- */
-
 (function() {
     window.DerivData = window.DerivData || {};
 
@@ -15,58 +8,90 @@
             this.ws = new WebSocket(this.url);
             this.callbacks = {};
             this.authorized = false;
+            this.connected = false; // Flag for connection status
     
+            // Handle 'onopen', 'onmessage', and 'onclose' events
+            this.ws.onopen = () => {
+                this.connected = true;
+                console.log("WebSocket connection established");
+                if (this._resolveConnectionPromise) { // In case waiting promise exists, resolve it
+                    this._resolveConnectionPromise();
+                    this._resolveConnectionPromise = null;
+                }
+            };
+        
             this.ws.onmessage = (event) => {
                 const message = JSON.parse(event.data);
                 if (message.req_id && this.callbacks[message.req_id]) {
                     this.callbacks[message.req_id](message);
                     delete this.callbacks[message.req_id];
-    
+
                     if (message.authorize) {
                         this.authorized = true;
                     }
                 }
             };
-    
-            // Automatically send a ping every pingInterval milliseconds
+
+            this.ws.onclose = () => {
+                this.connected = false;
+                console.log("WebSocket connection closed");
+            };
+
+            this.ws.onerror = (error) => {
+                console.error("WebSocket error", error);
+                this.connected = false;
+            };
+
+            // Send a ping every 5 seconds if connected
             this.pingInterval = setInterval(() => {
-                this.ws.send(JSON.stringify({ ping: 1 }));
+                if (this.connected) {  
+                    this.ws.send(JSON.stringify({ ping: 1 }));
+                }
             }, 5000);
         }
-    
+
+        // Waits for the WebSocket to be ready (returns instantly if already connected)
+        waitForConnection() {
+            if (this.connected) {
+                return Promise.resolve(); // Already connected, resolve the promise instantly
+            }
+
+            // Return a new promise that will resolve once WebSocket is connected
+            return new Promise((resolve) => {
+                this._resolveConnectionPromise = resolve;
+            });
+        }
+
         authorize(token) {
             return this.request({ authorize: token });
         }
-    
+
         request(data) {
             return new Promise((resolve, reject) => {
-                if (this.ws.readyState !== WebSocket.OPEN) {
-                    return reject("WebSocket not open");
+                if (!this.connected) {
+                    return reject("WebSocket not connected");
                 }
     
-                // Assign a unique request ID
                 this.reqId += 1;
                 const reqId = this.reqId;
-    
-                // Attach the req_id to the data
+
                 const requestData = {
                     ...data,
                     req_id: reqId,
                 };
-    
-                // Store the promise's resolve in the callbacks registry
+
                 this.callbacks[reqId] = (response) => resolve(response);
-    
-                // Send the serialized object
+
                 this.ws.send(JSON.stringify(requestData));
             });
         }
-    
+
         close() {
             clearInterval(this.pingInterval);
             this.ws.close();
+            this.connected = false;
         }
     };
-    
+
     window.DerivData.simpleWS = new SimpleWebSocket();
 })();
