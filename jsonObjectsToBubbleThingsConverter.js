@@ -1,50 +1,20 @@
-const types = {
-    BOOLEAN: 'boolean',
-    DATE: 'date',
-    NUMBER: 'number',
-    TEXT: 'text',
-};
-
-const getValueType = (value) => {
-    const type = typeof value;
-
-    if (type === 'string') {
-        return types.TEXT;
-    }
-
-    if (type === 'boolean') {
-        return types.BOOLEAN;
-    }
-
-    if (type === 'number') {
-        // TODO: add check for returning types.DATE if number is a valid unix epoch timestamp
-        return types.NUMBER;
-    }
-};
-
-
 /*
     A utility function to convert JSON received from API calls to a bubble data things JSON format.
     It works by appending `_<typeof the value>` to the `key` of the object and helps us to get access to types in the editor. 
 */
-const jsonObjectsToBubbleThingsConverter = (originalObject) => {
-    return Object.keys(originalObject).reduce((acc, key) => {
-        let newKeyName = `${key}_${getValueType(originalObject[key]) ?? ''}`;
-        acc[newKeyName] = originalObject[key];
-        return acc;
-    }, {})
+const jsonObjectsToBubbleThings = (originalObject) => {
+    if (Array.isArray(originalObject)) {
+        // If the object is an array, recursively apply the function to each element
+        return originalObject.map(item => jsonObjectsToBubbleThings(item));
+    } else if (typeof originalObject === "object" && originalObject !== null) {
+        // If the object is an object, create a new object with modified keys
+        return Object.keys(originalObject).reduce((acc, key) => {
+            // Prepend prefix to the key and apply the function recursively on the value
+            const newKey = "_api_c2_" + key;
+            acc[newKey] = jsonObjectsToBubbleThings(originalObject[key]);
+            return acc;
+        }, {});
+    }
+    // If it's neither an object nor an array, return the value as it is
+    return originalObject;
 };
-
-
-/* --- Test --- */
-const testObject = {
-    name: "Alice",
-    age: 25,
-    city: "Wonderland",
-    isStudent: false
-};
-
-console.log("Original JSON Object:")
-console.log(testObject)
-console.log("\nGenerated Bubble Object:")
-console.log(jsonObjectsToBubbleThingsConverter(testObject))
