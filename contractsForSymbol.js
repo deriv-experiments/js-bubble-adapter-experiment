@@ -26,8 +26,8 @@
 
                 const response = await this.wsClient.request(payload);
                 if (response) {
-                    console.log(jsonObjectsToBubbleThings(response), window.bubbleInstance)
-                    window.bubbleInstance.publishState("contractsforsymbol_state", jsonObjectsToBubbleThings(response));
+                    console.log(jsonObjectsToBubbleThings(response["contracts_for"]))
+                    window.bubbleInstance.publishState("contractsforsymbol_state", jsonObjectsToBubbleThings(response["contracts_for"]));
                     return response;
                 }
 

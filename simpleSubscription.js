@@ -8,13 +8,11 @@
         }
 
         // Subscribe and wait for authorization first
-        async subscribe(subscriptionName, token, payload = {}) {
-            if (this.activeSubscriptions[subscriptionName] && this.activeSubscriptions.promise) {
+        async subscribe(token, payload, callback, subscriptionID) {
+            if (subscriptionID && this.activeSubscriptions[subscriptionID] && this.activeSubscriptions.promise) {
                 console.warn("Subscription is already active. Only one allowed!");
-                return this.activeSubscriptions[subscriptionName].promise;
+                return this.activeSubscriptions[subscriptionID];
             }
-
-            this.activeSubscriptions[subscriptionName] = {};
 
             try {
                 // Wait for authorization first
@@ -26,75 +24,76 @@
 
                 // Construct the subscription request payload
                 const requestData = {
-                    [subscriptionName]: 1,
-                    subscribe: 1,
-                    ...payload
+                    ...payload,
+                    subscribe: 1
                 };
 
                 console.log("Sending subscription request:", requestData);
-                this.activeSubscriptions[subscriptionName]["promise"] = this.wsClient.request(requestData);
 
                 // Wait for server response
-                const response = await this.activeSubscriptions[subscriptionName].promise;
+                const response = await this.wsClient.request(requestData);
 
                 if (response.req_id) {
-                    this.activeSubscriptions[subscriptionName]["id"] = response.subscription.id;
-                    console.log(`Subscription confirmed for ${subscriptionName} with req_id:`, response.subscription.id);
+                    this.activeSubscriptions[response.subscription.id] = {};
+                    this.activeSubscriptions[response.subscription.id] = response;
+                    console.log(`Subscription confirmed for ${response.msg_type} with req_id:`, response.subscription.id);
 
-                    this._startListeningToMessages(subscriptionName);
+                    this._startListeningToMessages(response.subscription.id, callback);
                     console.log(this.activeSubscriptions)
                     return response;
                 }
 
-                console.log("exploded", response)
-
                 // If something explodes
-                throw new Error(`Subscription failed for ${subscriptionName}!`);
+                throw new Error(`Subscription failed for ${response.msg_type}!`);
 
             } catch (error) {
                 console.error("Subscription error:", error);
-                delete this.activeSubscriptions[subscriptionName];
                 throw error;
             }
         }
 
-        async unsubscribe(subscriptionName) {
-            if (this.activeSubscriptions[subscriptionName]) {
-                console.log("forgetting", subscriptionName)
+        async unsubscribe(subscriptionID) {
+            if (this.activeSubscriptions[subscriptionID]) {
+
+                console.log("unsubscribing", subscriptionID)
                 const requestData = {
-                    forget: this.activeSubscriptions[subscriptionName].id
+                    forget: subscriptionID
                 };
 
                 try {
 
                     const response = await this.wsClient.request(requestData);
 
-                    if (response.echo_req.forget === this.activeSubscriptions[subscriptionName].id) {
-                        console.log(`Successful un-subscription for ${subscriptionName}`);
+                    if (response.echo_req.forget === subscriptionID) {
+                        console.log(`Successful un-subscription for ${subscriptionID} - ${response}`);
 
-                        delete this.activeSubscriptions[subscriptionName];
+                        delete this.activeSubscriptions[subscriptionID];
 
                         return response;
                     }
-                    console.log(this.activeSubscriptions)
 
-                    throw new Error(`Unsubscribing for ${subscriptionName} failed`);
+                    throw new Error(`Unsubscribing for ${subscriptionID} failed`);
                 } catch (error) {
                     console.error("Un-subscription error:", error);
-                    delete this.activeSubscriptions[subscriptionName];
                     throw error;
                 }
+            } else {
+                console.warn("no active subscriptions for", subscriptionID);
+                return;
             }
         }
 
         // Register a listener for the incoming subscription messages
-        _startListeningToMessages(subscriptionName) {
+        _startListeningToMessages(subscriptionID, callback) {
             this.wsClient.ws.addEventListener("message", (event) => {
                 const message = JSON.parse(event.data);
 
-                if (message.msg_type !== "ping" && message.subscription.id === this.activeSubscriptions[subscriptionName].id) {
-                    console.log("Received subscription update:", message);
+                if (message.msg_type !== "ping" && message.subscription && message.subscription.id === subscriptionID) {
+                    // console.log("Received subscription update:", message);
                     // Handle messages here
+                    if (callback) {
+                        callback(message);
+                    }
                 }
             });
         }

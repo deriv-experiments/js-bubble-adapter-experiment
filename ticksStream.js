@@ -2,10 +2,13 @@
     class TicksStream {
         constructor(wsClient) {
             this.wsClient = wsClient;
-            this.data = null;
+            this.data = [{ ask: 0, epoch: 0 }];
+            this.currentSubscriptionID = null;
         }
 
         async subscribe(symbol = "WLDAUD", stateName) {
+            this.unsubscribe();
+
             try {
                 const payload = {
                     "ticks": symbol,
@@ -14,17 +17,30 @@
                 const callback = (response) => {
                     if (stateName) {
                         console.log("updating state", stateName)
-                        console.log(jsonObjectsToBubbleThings(response))
-                        window.bubbleInstance.publishState(stateName, jsonObjectsToBubbleThings(response["tick"]));
+                        this.data.push(jsonObjectsToBubbleThings(response["tick"]));
+                        window.bubbleInstance.publishState(stateName, this.data);
                     }
                 };
 
-                await DerivData.simpleSubscriptionStore.subscribe("a1-pRokL65OC3LA90AgZKegzalyl34MJ", payload, callback);
+                const response = await DerivData.simpleSubscriptionStore.subscribe("a1-pRokL65OC3LA90AgZKegzalyl34MJ", payload, callback);
+
+                this.currentSubscriptionID = response.subscription.id;
+                return response.subscription.id;
 
             } catch (error) {
                 throw error;
             }
         }
+
+
+        async unsubscribe() {
+            if (this.currentSubscriptionID) {
+                await DerivData.simpleSubscriptionStore.unsubscribe(this.currentSubscriptionID);
+                this.currentSubscriptionID = null;
+                this.data = [];
+            }
+        }
+
     }
 
     window.DerivData = window.DerivData || {};
