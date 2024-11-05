@@ -2,7 +2,7 @@
     class ContractsForSymbolStore {
         constructor(wsClient) {
             this.wsClient = wsClient;
-            this.activeSymbolsData = null;
+            this.data = null;
         }
 
         async request(symbolName) {
@@ -26,7 +26,8 @@
 
                 const response = await this.wsClient.request(payload);
                 if (response) {
-                    console.log(jsonObjectsToBubbleThings(response["contracts_for"]))
+                    this.data = response["contracts_for"];
+
                     window.bubbleInstance.publishState("contractsforsymbol_state", jsonObjectsToBubbleThings(response["contracts_for"]));
                     return response;
                 }

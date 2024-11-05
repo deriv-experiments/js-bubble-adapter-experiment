@@ -2,14 +2,14 @@
     class TicksStream {
         constructor(wsClient) {
             this.wsClient = wsClient;
-            this.data = [{ ask: 0, epoch: 0 }];
+            this.data = [];
             this.currentSubscriptionID = null;
         }
 
         async subscribe(symbol = "WLDAUD", stateName) {
-            this.unsubscribe();
 
             try {
+                await this.unsubscribe();
                 const payload = {
                     "ticks": symbol,
                 };
