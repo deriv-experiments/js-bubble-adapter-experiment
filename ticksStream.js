@@ -1,48 +1,41 @@
 (function () {
     class TicksStream {
-        constructor(wsClient) {
+        constructor(wsClient, subscription) {
             this.wsClient = wsClient;
-            this.data = [];
+            this.subscription = subscription;
             this.currentSubscriptionID = null;
+            this.data = [];
         }
 
-        async subscribe(symbol = "WLDAUD", stateName) {
-
+        async subscribe(symbol = "WLDAUD", onDataHandler) {
             try {
-                await this.unsubscribe();
                 const payload = {
                     "ticks": symbol,
                 };
 
-                const callback = (response) => {
-                    if (stateName) {
-                        console.log("updating state", stateName)
-                        this.data.push(jsonObjectsToBubbleThings(response["tick"]));
-                        window.bubbleInstance.publishState(stateName, this.data);
-                    }
-                };
+                const response = await this.subscription.subscribe("ticks", payload, onDataHandler);
 
-                const response = await DerivData.simpleSubscriptionStore.subscribe("a1-pRokL65OC3LA90AgZKegzalyl34MJ", payload, callback);
-
-                this.currentSubscriptionID = response.subscription.id;
-                return response.subscription.id;
-
+                this.currentSubscriptionID = response;
             } catch (error) {
                 throw error;
             }
         }
 
-
         async unsubscribe() {
-            if (this.currentSubscriptionID) {
-                await DerivData.simpleSubscriptionStore.unsubscribe(this.currentSubscriptionID);
-                this.currentSubscriptionID = null;
-                this.data = [];
+            try {
+                await this.subscription.unsubscribeById(this.currentSubscriptionID);
+            } catch (error) {
+                throw error;
             }
+        }
+
+        clearCache() {
+            this.currentSubscriptionID = null;
+            this.data = [];
         }
 
     }
 
     window.DerivData = window.DerivData || {};
-    window.DerivData.ticksStreamStore = new TicksStream(window.DerivData.simpleWS);
+    window.DerivData.ticksStreamStore = new TicksStream(window.DerivData.simpleWS, window.DerivData.subscription);
 })()
