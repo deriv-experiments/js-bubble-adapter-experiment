@@ -11,11 +11,16 @@
                 const payload = {
                     ...tradeParams
                 };
+
+                const onData = (data) => {
+                    const _data = jsonObjectsToBubbleThings(data["proposal"]);
+                    onDataHandler(_data);
+                }
                 /* 
                     We do not store the subscriptionID return by subscribe as we
                     unsubscribe to all `proposal` streams at ones.
                 */
-                await this.subscription.subscribe("proposal", payload, onDataHandler);
+                await this.subscription.subscribe("proposal", payload, onData);
             } catch (error) {
                 throw error;
             }

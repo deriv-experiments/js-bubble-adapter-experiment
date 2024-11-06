@@ -13,7 +13,12 @@
                     "ticks": symbol,
                 };
 
-                const response = await this.subscription.subscribe("ticks", payload, onDataHandler);
+                const onData = (data) => {
+                    this.data.push(jsonObjectsToBubbleThings(data["tick"]));
+                    onDataHandler(this.data);
+                };
+
+                const response = await this.subscription.subscribe("ticks", payload, onData);
 
                 this.currentSubscriptionID = response;
             } catch (error) {
