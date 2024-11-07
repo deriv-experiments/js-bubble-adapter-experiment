@@ -13,7 +13,9 @@
 
                 const payload = {
                     "active_symbols": "brief",
-                    "product_type": "basic"
+                    "product_type": "basic",
+                    "barrier_category": ["euro_atm"],
+                    "contract_type": ["CALL"]
                 };
 
                 const response = await this.wsClient.request(payload);
