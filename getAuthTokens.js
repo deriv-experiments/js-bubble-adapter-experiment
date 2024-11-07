@@ -1,42 +1,36 @@
 (function () {
-    function generateTokens(url) {
-        // Extract the query parameters from the URL
-        const urlParams = new URL(url).searchParams;
-        const result = {};
+    function getParams(url) {
+        // Parse the URL parameters
+        let params = new URLSearchParams(url.split('?')[1]);
+        let accounts = [];
+        let i = 1;
 
-        // Loop through the parameters and match each "acct" with the corresponding "token"
-        for (const [key, value] of urlParams.entries()) {
-            if (key.startsWith('acct')) {
-                const tokenKey = `token${key.split('').pop()}`;
-                const tokenValue = urlParams.get(tokenKey);
-
-                if (tokenValue) {
-                    result[value] = tokenValue;
-                }
-            }
+        // Loop to capture dynamic `acct`, `token`, and `cur` parameters
+        while (params.has(`acct${i}`) && params.has(`token${i}`) && params.has(`cur${i}`)) {
+            // Push each account's details as an object into the accounts array
+            accounts.push({
+                acct: params.get(`acct${i}`),
+                token: params.get(`token${i}`),
+                cur: params.get(`cur${i}`)
+            });
+            i++;
         }
 
-        return result;
+        return accounts;
     }
 
-    function storeTokensInLocalStorage() {
-        localStorage.removeItem("client_accounts");
-        console.log("removed existing tokens");
-        localStorage.setItem("client_accounts", JSON.stringify(generateTokens(window.location.href)));
-    }
+    const path = window.location.pathname.split("/");
+    if (path.includes("redirect")) {
+        // Use the function on the current URL
+        let url = window.location.href;
+        let userAccounts = getParams(url);
 
-    const path = window.location.pathname.split("/").pop();
-    if (path === 'redirect') {
-        storeTokensInLocalStorage();
+        // Store the array of account objects as a JSON string in local storage
+        localStorage.setItem('user_accounts', JSON.stringify(userAccounts));
+
+        // Set the first account as the selected account if the list is not empty
+        if (userAccounts.length > 0) {
+            localStorage.setItem('selected_account', JSON.stringify(userAccounts[0]));
+        }
     }
 })()
-
-function getTokensFromLocalStorage() {
-    const tokens = localStorage.getItem("client_accounts");
-    if (tokens) {
-        return JSON.parse(tokens);
-    }
-    return null;
-}
-
-// ?acct1=account_1&token1=token_1&acct2=account_2&token2=token_2&acct3=account_3&token3=token_3
