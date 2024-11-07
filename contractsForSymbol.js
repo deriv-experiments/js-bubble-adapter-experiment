@@ -5,30 +5,21 @@
             this.data = null;
         }
 
-        async request(symbolName) {
+        async request(payload, onDataHandler) {
 
             try {
-
                 await this.wsClient.waitForConnection();
 
-                console.log("symbol", symbolName)
-                if (!symbolName) {
-                    throw new Error("Error: no symbol selected for contracts_for ")
+                const _payload = {
+                    contracts_for: payload.symbol,
+                    currency: payload.currency
                 }
 
+                const response = await this.wsClient.request(_payload);
 
-                const payload = {
-                    "contracts_for": symbolName,
-                    "currency": "USD",
-                    "landing_company": "svg",
-                    "product_type": "basic"
-                };
-
-                const response = await this.wsClient.request(payload);
                 if (response) {
                     this.data = response["contracts_for"];
-
-                    window.bubbleInstance.publishState("contractsforsymbol_state", jsonObjectsToBubbleThings(response["contracts_for"]));
+                    onDataHandler(jsonObjectsToBubbleThings(this.data));
                     return response;
                 }
 
