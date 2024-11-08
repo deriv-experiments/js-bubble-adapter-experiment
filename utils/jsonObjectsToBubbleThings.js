@@ -18,3 +18,5 @@ const jsonObjectsToBubbleThings = (originalObject) => {
     // If it's neither an object nor an array, return the value as it is
     return originalObject;
 };
+
+export default jsonObjectsToBubbleThings;
