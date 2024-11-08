@@ -1,3 +1,3 @@
-# js
+# DerivAPI.js - Bubble.io plugin code
 
-very ugly, just for the sake of low code testing
+A lightweight JS library for connecting to Deriv Websocket which can be used in custom bubble plugins.
