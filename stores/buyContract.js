@@ -1,3 +1,5 @@
+import jsonObjectsToBubbleThings from "../utils/jsonObjectsToBubbleThings.js";
+
 class BuyContractStore {
     constructor(wsClient, authorizationStore) {
         this.wsClient = wsClient;
@@ -19,7 +21,7 @@ class BuyContractStore {
             const response = await this.wsClient.request(payload);
 
             if (response) {
-                onDataHandler(response);
+                onDataHandler(jsonObjectsToBubbleThings(response["buy"]));
             }
 
         } catch (error) {
