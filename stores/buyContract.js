@@ -21,7 +21,8 @@ class BuyContractStore {
             const response = await this.wsClient.request(payload);
 
             if (response) {
-                onDataHandler(jsonObjectsToBubbleThings(response["buy"]));
+                const contractId = response["buy"]["contract_id"];
+                onDataHandler(jsonObjectsToBubbleThings(response["buy"]), contractId);
             }
 
         } catch (error) {

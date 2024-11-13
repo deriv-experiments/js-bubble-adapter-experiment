@@ -3,6 +3,7 @@ import ActiveSymbolsStore from './stores/activeSymbols.js';
 import BuyContractStore from './stores/buyContract.js';
 import ContractsForCompanyStore from './stores/contractsForCompany.js';
 import ContractsForSymbolStore from './stores/contractsForSymbol.js';
+import ProposalOpenContractStream from './streams/proposalOpenContract.js';
 import ProposalStream from './streams/proposal.js';
 import TicksStream from './streams/ticksStream.js';
 import Forget from './ws/forget.js';
@@ -27,6 +28,7 @@ class DerivData {
 
         // instantiate data streams
         this.proposalStream = new ProposalStream(this.subscription);
+        this.proposalOpenContractStream = new ProposalOpenContractStream(this.subscription);
         this.ticksStream = new TicksStream(this.subscription);
     }
 };
