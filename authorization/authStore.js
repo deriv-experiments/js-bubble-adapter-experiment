@@ -1,3 +1,5 @@
+const OAUTH_URL = 'https://oauth.deriv.com/oauth2/authorize?app_id=65401&l=EN&brand=deriv';
+
 class AuthStore {
     constructor(wsClient) {
         this.wsClient = wsClient;
@@ -86,6 +88,10 @@ class AuthStore {
     clearCache() {
         this.authData = null;
         this.readyPromise = null;  // Invalidate current ready promise if cache is cleared
+    }
+
+    oauthRedirect() {
+        window.location.href = OAUTH_URL;
     }
 };
 

@@ -1,5 +1,6 @@
 class WSClient {
     constructor() {
+        //
         this.url = "wss://red.derivws.com/websockets/v3?app_id=65401&l=EN&brand=deriv";
         this.reqId = 0;
         this.ws = new WebSocket(this.url);
