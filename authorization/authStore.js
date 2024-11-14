@@ -2,8 +2,13 @@ class AuthStore {
     constructor(wsClient) {
         this.wsClient = wsClient;
         this.authData = null;  // Cache for the authorization data!
-        this.authPromise = null;  // Hold the promise to avoid duplicate calls.
         this.readyPromise = null; // A promise that will resolve once authorization is done
+
+        this.authPromise = new Promise((resolve, reject) => {
+            this.authPromiseResolve = resolve;
+            this.authPromiseReject = reject;
+        });
+        this.authInProgress = false;
     }
 
     async authorize(token) {
@@ -12,8 +17,8 @@ class AuthStore {
             return this.authData;
         }
 
-        // If a request is already in-flight, return the promise.
-        if (this.authPromise) {
+        // If authorization is already in progress, wait for it to finish.
+        if (this.authInProgress) {
             return this.authPromise;
         }
 
@@ -22,8 +27,9 @@ class AuthStore {
             await this.wsClient.waitForConnection();
 
             // First-time authorization or cache busted, make the request.
-            this.authPromise = this.wsClient.authorize(token);
-            const response = await this.authPromise;
+            const response = await this.wsClient.authorize(token);
+
+            this.authPromiseResolve(response);
 
             // Check if authorization succeeded.
             if (response.authorize) {

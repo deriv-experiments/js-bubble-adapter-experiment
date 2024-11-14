@@ -1,6 +1,6 @@
 class WSClient {
     constructor() {
-        this.url = "wss://green.derivws.com/websockets/v3?app_id=16929&l=EN&brand=deriv";
+        this.url = "wss://red.derivws.com/websockets/v3?app_id=65401&l=EN&brand=deriv";
         this.reqId = 0;
         this.ws = new WebSocket(this.url);
         this.callbacks = {};
@@ -46,18 +46,16 @@ class WSClient {
                 this.ws.send(JSON.stringify({ ping: 1 }));
             }
         }, 5000);
+
+        this._onConnectedPromise = new Promise((resolve) => {
+            this._connectedPromiseResolve = resolve;
+        });
     }
 
     // Waits for the WebSocket to be ready (returns instantly if already connected)
     waitForConnection() {
         if (this.connected) {
             return Promise.resolve(); // Already connected, resolve the promise instantly
-        }
-
-        if (!this._onConnectedPromise) {
-            this._onConnectedPromise = new Promise((resolve) => {
-                this._connectedPromiseResolve = resolve;
-            });
         }
 
         return this._onConnectedPromise;
