@@ -11,9 +11,9 @@ class WSClient {
         this.ws.onopen = () => {
             this.connected = true;
             console.log("WebSocket connection established");
-            if (this._resolveConnectionPromise) { // In case waiting promise exists, resolve it
-                this._resolveConnectionPromise();
-                this._resolveConnectionPromise = null;
+            if (this._connectedPromiseResolve) { // In case waiting promise exists, resolve it
+                this._connectedPromiseResolve();
+                this._connectedPromiseResolve = null;
             }
         };
 
@@ -54,10 +54,13 @@ class WSClient {
             return Promise.resolve(); // Already connected, resolve the promise instantly
         }
 
-        // Return a new promise that will resolve once WebSocket is connected
-        return new Promise((resolve) => {
-            this._resolveConnectionPromise = resolve;
-        });
+        if (!this._onConnectedPromise) {
+            this._onConnectedPromise = new Promise((resolve) => {
+                this._connectedPromiseResolve = resolve;
+            });
+        }
+
+        return this._onConnectedPromise;
     }
 
     authorize(token) {

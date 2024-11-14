@@ -30,6 +30,25 @@ class DerivData {
         this.proposalStream = new ProposalStream(this.subscription);
         this.proposalOpenContractStream = new ProposalOpenContractStream(this.subscription);
         this.ticksStream = new TicksStream(this.subscription);
+
+
+        let selectedAccount;
+        let token;
+        
+        try {
+            selectedAccount = JSON.parse(localStorage.getItem('selected_account'));
+            token = selectedAccount.token;
+        } catch(e) {
+            console.log("error parsing localstorage!")
+        }
+
+
+        if (!selectedAccount || !token) {
+            console.log("No token found in localstorage, please login first!");
+            return;
+        } else {
+            this.authStore.authorize(token);
+        }
     }
 };
 
