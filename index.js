@@ -1,5 +1,6 @@
 import AuthStore from './authorization/authStore.js';
 import ActiveSymbolsStore from './stores/activeSymbols.js';
+import BalanceStore from './stores/balance.js';
 import BuyContractStore from './stores/buyContract.js';
 import ContractsForCompanyStore from './stores/contractsForCompany.js';
 import ContractsForSymbolStore from './stores/contractsForSymbol.js';
@@ -22,6 +23,7 @@ class DerivData {
         // instantiate data stores
         this.authStore = new AuthStore(this.wsClient);
         this.activeSymbolsStore = new ActiveSymbolsStore(this.wsClient);
+        this.balanceStore = new BalanceStore(this.wsClient, this.authStore);
         this.buyContractStore = new BuyContractStore(this.wsClient, this.authStore);
         this.contractsForSymbolStore = new ContractsForSymbolStore(this.wsClient);
         this.contractsForCompanyStore = new ContractsForCompanyStore(this.wsClient);
@@ -34,11 +36,11 @@ class DerivData {
 
         let selectedAccount;
         let token;
-        
+
         try {
             selectedAccount = JSON.parse(localStorage.getItem('selected_account'));
             token = selectedAccount.token;
-        } catch(e) {
+        } catch (e) {
             console.log("error parsing localstorage!")
         }
 
