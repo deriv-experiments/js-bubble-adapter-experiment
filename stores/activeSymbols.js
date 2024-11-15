@@ -6,7 +6,7 @@ class ActiveSymbolsStore {
         this.activeSymbolsData = null;
     }
 
-    async request() {
+    async request(onDataHandler) {
 
         try {
 
@@ -21,7 +21,7 @@ class ActiveSymbolsStore {
 
             const response = await this.wsClient.request(payload);
             if (response) {
-                window.bubbleInstance.publishState("activesymbols_state", jsonObjectsToBubbleThings(response));
+                onDataHandler(jsonObjectsToBubbleThings(response));
                 return response;
             }
 
