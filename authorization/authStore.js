@@ -52,11 +52,16 @@ class AuthStore {
                 this.readyPromise.reject(error);
             }
 
+            this.authPromiseResolve(null);
+
             console.error('Authorization error:', error);
             throw error;
         } finally {
+                        
+            this.authPromiseResolve(null);
             // Clear the promise, regardless of the outcome.
             this.authPromise = null;
+
         }
     }
 
