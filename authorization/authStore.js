@@ -61,7 +61,7 @@ class AuthStore {
     }
 
     // Returns a promise that resolves once authorized, or rejects if authorization fails
-    waitForAuthorization(token) {
+    waitForAuthorization() {
         if (this.authData) {
             // Already authorized, return a resolved promise with the auth data.
             return Promise.resolve(this.authData);
@@ -76,10 +76,7 @@ class AuthStore {
                 this.readyPromise.reject = reject;
             });
         }
-
-        // Call authorize to kickstart authorization if needed
-        this.authorize(token); // Don't await, we'll resolve properly!
-
+        
         // Return the readyPromise for consumer to await on!
         return this.readyPromise.promise;
     }
