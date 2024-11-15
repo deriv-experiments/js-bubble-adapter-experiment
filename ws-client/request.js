@@ -8,14 +8,10 @@ let reqSeqNumber = 0;
  * no handling of reconnections, no state, nothing, just send
  * even request seq number is outside of its scope (reason being, that req_seq needs to be also used by the subscriptions)
  */
-function request(
-    ws: WebSocket,
-    name: any,
-    payload: any
-): Promise<any> {
+function request(ws, name, payload) {
     const req_id = ++reqSeqNumber;
 
-    const promise: Promise<any> = new Promise((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
         if (ws.readyState === ws.CLOSED || ws.readyState === ws.CLOSING) {
             reject(new Error('WS is closed or closing'));
             return;
@@ -26,12 +22,12 @@ function request(
             return;
         }
 
-        const timeout: NodeJS.Timeout = setTimeout(() => {
+        const timeout = setTimeout(() => {
             ws.removeEventListener('message', receive);
             reject(new Error(`Request timeout, request: ${name}, payload: ${JSON.stringify(payload)}`));
         }, REQ_TIMEOUT);
 
-        function receive(messageEvent: MessageEvent) {
+        function receive(messageEvent) {
             const data = JSON.parse(messageEvent.data);
             if (data.req_id !== req_id) {
                 return;
@@ -67,11 +63,7 @@ function request(
  * response is not expected, fire and forget,
  * e.g. to unsubscribe - send unsubscribe request away and don't wait for response, e.g. when closing connection
  */
-function send(
-    ws: WebSocket,
-    name: any,
-    payload: any
-): void {
+function send(ws, name, payload) {
     const req_id = ++reqSeqNumber;
 
     if (ws.readyState === ws.CLOSED || ws.readyState === ws.CLOSING) {

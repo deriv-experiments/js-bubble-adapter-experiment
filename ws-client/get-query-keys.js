@@ -1,4 +1,4 @@
-const getQueryKeys = (name: string, props?: Record<string, unknown>) => {
+const getQueryKeys = (name, props) => {
     if (!props) return [name];
 
     delete props.req_id;
@@ -10,14 +10,12 @@ const getQueryKeys = (name: string, props?: Record<string, unknown>) => {
         .sort((a, b) => a.localeCompare(b))
         .reduce((obj, key) => {
             obj[key] = props[key];
-
             return obj;
-        }, {} as { [k: string]: unknown });
+        }, {});
 
     const query_props = JSON.stringify(ordered_props);
 
     return [name, query_props];
 };
-
 
 export default getQueryKeys;

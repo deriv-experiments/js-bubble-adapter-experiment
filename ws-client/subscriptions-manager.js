@@ -1,11 +1,11 @@
-import Subscription from './subscription';
-import getQueryKeys from './get-query-keys';
+import Subscription from './subscription.js';
+import getQueryKeys from './get-query-keys.js';
 
 export default class SubscriptionsManager {
-    backendSubscriptions: Map<string, Subscription> = new Map();
-    authorizedWs?: WebSocket;
+    backendSubscriptions = new Map();
+    authorizedWs;
 
-    setAuthorizedWs(authorizedWs?: WebSocket) {
+    setAuthorizedWs(authorizedWs) {
         this.authorizedWs = authorizedWs;
 
         this.backendSubscriptions.forEach(subscription => {
@@ -30,18 +30,15 @@ export default class SubscriptionsManager {
         await Promise.all(unsubscribePromises);
     }
 
-    async subscribe(
-        name: any,
-        payload: any,
-        onData: (data: any) => void
-    ) {
+    async subscribe(name, payload, onData) {
         if (!this.authorizedWs) {
             throw new Error('Unauthorized websocket connection.');
         }
-        const keys: Array<string> = getQueryKeys(name, payload); // potentially switch to separate function, which just returns primitive values (string)
-        const key = keys.join('-'); // but until then, use "join" to convert array of specific structure to just string (no idea why it's overcomplicated in the first place)
 
-        let backendSubscription: Subscription | undefined;
+        const keys = getQueryKeys(name, payload);
+        const key = keys.join('-');
+
+        let backendSubscription;
 
         if (!this.backendSubscriptions.has(key)) {
             backendSubscription = new Subscription(this.authorizedWs, name, payload);

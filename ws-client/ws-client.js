@@ -1,28 +1,36 @@
-import SubscriptionsManager from './subscriptions-manager';
-import request from './request';
+import SubscriptionsManager from './subscriptions-manager.js';
+import request from './request.js';
 
 /**
  * WSClient as main instance
  */
 export default class WSClient {
-    ws?: WebSocket;
-    subscriptionManager: SubscriptionsManager;
+    ws;
+    subscriptionManager;
     isAuthorized = false;
-    onAuthorized?: () => void;
+    onAuthorized;
 
-    constructor(onAuthorized?: () => void) {
+    constructor(onAuthorized) {
         this.onAuthorized = onAuthorized;
         this.subscriptionManager = new SubscriptionsManager();
     }
 
-    setWs(ws: WebSocket) {
+    setWs(ws) {
         if (this.ws !== ws) {
             this.isAuthorized = false;
             this.ws = ws;
         }
     }
 
-    private onWebsocketAuthorized() {
+    authorize(token) {
+        if (!this.ws) {
+            return Promise.reject(new Error('WS is not set'));
+        }
+
+        return this.request('authorize', { token });
+    }
+
+    onWebsocketAuthorized() {
         if (!this.ws) {
             return;
         }
@@ -33,15 +41,13 @@ export default class WSClient {
         this.subscriptionManager.setAuthorizedWs(this.ws);
     }
 
-    async request(
-        name: any,
-        payload?: any
-    ): Promise<any> {
+    async request(name, payload) {
         if (!this.ws) {
             return Promise.reject(new Error('WS is not set'));
         }
-        return request(this.ws, name, payload).then((response: any) => {
-            if ((response as unknown as any).msg_type === 'authorize') {
+
+        return request(this.ws, name, payload).then((response) => {
+            if (response.msg_type === 'authorize') {
                 this.onWebsocketAuthorized();
             }
 
@@ -49,11 +55,7 @@ export default class WSClient {
         });
     }
 
-    subscribe(
-        name: any,
-        payload: any,
-        onData: (data: any) => void
-    ) {
+    subscribe(name, payload, onData) {
         return this.subscriptionManager?.subscribe(name, payload, onData);
     }
 

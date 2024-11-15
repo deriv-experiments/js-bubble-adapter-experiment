@@ -1,26 +1,26 @@
-import request, { send } from './request';
+import request, { send } from './request.js';
 
 /**
  * Subscribes directly to backend stream
  * Backend does not support duplicate subscription on different subscriptionId though,
- * so thats why we have subscriptions manager - to group multiple FE subscription in one backend subscriptions
+ * so thats why we have subscriptions manager - to group multiple FE subscriptions in one backend subscription
  */
 export default class Subscription {
-    authorizedWs: WebSocket;
-    name: any;
-    payload: any;
+    authorizedWs;
+    name;
+    payload;
 
-    reqId: number | null;
-    subscriptionId: string | null;
+    reqId;
+    subscriptionId;
 
-    lastData: any;
+    lastData;
 
-    boundOnWsMessage: (messageEvent: MessageEvent) => void;
-    boundOnWsClose: () => void;
+    boundOnWsMessage;
+    boundOnWsClose;
 
-    listeners: Array<(data: any) => void>;
+    listeners;
 
-    setAuthorizedWs(authorizedWs?: WebSocket) {
+    setAuthorizedWs(authorizedWs) {
         if (!authorizedWs) {
             return;
         }
@@ -33,11 +33,7 @@ export default class Subscription {
         this.subscribe();
     }
 
-    constructor(
-        authorizedWs: WebSocket,
-        name: any,
-        payload: any
-    ) {
+    constructor(authorizedWs, name, payload) {
         this.authorizedWs = authorizedWs;
         this.name = name;
         this.payload = payload;
@@ -68,7 +64,7 @@ export default class Subscription {
         this.authorizedWs.addEventListener('message', this.boundOnWsMessage);
         this.authorizedWs.addEventListener('close', this.boundOnWsClose);
 
-        const data: any = await request(this.authorizedWs, this.name, {
+        const data = await request(this.authorizedWs, this.name, {
             subscribe: 1,
             ...this.payload,
         });
@@ -80,16 +76,16 @@ export default class Subscription {
         this.listeners.forEach(listener => listener(data));
     }
 
-    addListener(onData: (data: any) => void) {
+    addListener(onData) {
         this.listeners.push(onData);
     }
 
-    removeListener(onData: (data: any) => void) {
+    removeListener(onData) {
         this.listeners = this.listeners.filter(listener => listener !== onData);
     }
 
-    onWsMessage(messageEvent: MessageEvent) {
-        const data = JSON.parse(messageEvent.data) as any;
+    onWsMessage(messageEvent) {
+        const data = JSON.parse(messageEvent.data);
 
         if (data.req_id !== this.reqId) {
             return;
