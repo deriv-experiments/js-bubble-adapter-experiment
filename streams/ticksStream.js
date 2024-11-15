@@ -29,6 +29,7 @@ class TicksStream {
     async unsubscribe() {
         try {
             await this.subscription.unsubscribeById(this.currentSubscriptionID);
+            this.data = [];
         } catch (error) {
             throw error;
         }
