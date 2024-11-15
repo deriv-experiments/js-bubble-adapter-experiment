@@ -5,7 +5,7 @@ const IS_DEV = window.location.pathname.includes("version-test");
 
 const APP_ID = IS_DEV ? DEV_APPID : PROD_APPID;
 
-const OAUTH_URL = `ttps://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&l=EN&brand=deriv`;
+const OAUTH_URL = `https://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&l=EN&brand=deriv`;
 
 class AuthStore {
     constructor(wsClient) {
@@ -64,7 +64,7 @@ class AuthStore {
             console.error('Authorization error:', error);
             throw error;
         } finally {
-                        
+
             this.authPromiseResolve(null);
             // Clear the promise, regardless of the outcome.
             this.authPromise = null;
@@ -88,7 +88,7 @@ class AuthStore {
                 this.readyPromise.reject = reject;
             });
         }
-        
+
         // Return the readyPromise for consumer to await on!
         return this.readyPromise.promise;
     }
