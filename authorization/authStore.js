@@ -49,6 +49,7 @@ class AuthStore {
                     this.readyPromise.resolve(this.authData);
                 }
             } else {
+                this.oauthRedirect();
                 throw new Error('Authorization failed');
             }
 
