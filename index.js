@@ -45,7 +45,7 @@ class DerivData {
 
         if (!selectedAccount || !token) {
             console.log("No token found in localstorage, please login first!");
-            throw new Error("No token found in localstorage, please login first!");
+            this.authStore.noTokenFound = 1;
         } else {
             this.authStore.authorize(token);
         }
