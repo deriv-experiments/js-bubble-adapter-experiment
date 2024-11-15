@@ -9,10 +9,6 @@ class BuyContractStore {
     async request(proposalID, price, onDataHandler) {
 
         try {
-            await this.authorizationStore.waitForAuthorization(
-                "a1-pRokL65OC3LA90AgZKegzalyl34MJ"
-            );
-
             const payload = {
                 buy: proposalID,
                 price
