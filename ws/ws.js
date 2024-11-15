@@ -1,7 +1,15 @@
+const DEV_APPID = 65401
+const PROD_APPID = 65656
+
+const IS_DEV = window.location.pathname.includes("version-test");
+
+const APP_ID = IS_DEV ? DEV_APPID : PROD_APPID;
+
+
 class WSClient {
     constructor() {
         //
-        this.url = "wss://red.derivws.com/websockets/v3?app_id=65401&l=EN&brand=deriv";
+        this.url = `wss://red.derivws.com/websockets/v3?app_id=${APP_ID}&l=EN&brand=deriv`;
         this.reqId = 0;
         this.ws = new WebSocket(this.url);
         this.callbacks = {};
