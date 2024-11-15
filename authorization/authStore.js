@@ -1,4 +1,11 @@
-const OAUTH_URL = 'https://oauth.deriv.com/oauth2/authorize?app_id=65401&l=EN&brand=deriv';
+const DEV_APPID = 65401
+const PROD_APPID = 65656
+
+const IS_DEV = window.location.pathname.includes("version-test");
+
+const APP_ID = IS_DEV ? DEV_APPID : PROD_APPID;
+
+const OAUTH_URL = `ttps://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&l=EN&brand=deriv`;
 
 class AuthStore {
     constructor(wsClient) {
