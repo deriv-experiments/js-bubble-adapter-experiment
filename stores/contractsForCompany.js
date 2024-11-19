@@ -1,5 +1,5 @@
-import jsonObjectsToBubbleThings from "../../utils/jsonObjectsToBubbleThings.js";
-import { modifyContracts } from "../../utils/modifyContracts.js";
+import jsonObjectsToBubbleThings from "../utils/jsonObjectsToBubbleThings.js";
+import { modifyContracts } from "../utils/modifyContracts.js";
 
 class ContractsForCompanyStore {
     constructor(wsClient, authStore) {
