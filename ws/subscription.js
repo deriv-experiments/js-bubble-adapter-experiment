@@ -55,6 +55,9 @@ class Subscription {
             const response = await this.wsClient.request(_payload);
 
             if (response) {
+                if ("error" in response) {
+                    throw response["error"];
+                }
                 const subscriptionID = response["subscription"]["id"];
                 this.#addSubscription(streamType, subscriptionID, onMessageHandler);
                 return subscriptionID;
