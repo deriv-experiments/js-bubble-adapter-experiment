@@ -1,4 +1,4 @@
-import { tradeConfig } from "../configs/tradeConfig.mjs";
+import { tradeConfig } from "../configs/tradeConfig.js";
 
 export const modifyContracts = (data) => {
     const combinedContracts = data.reduce((acc, curr) => {
