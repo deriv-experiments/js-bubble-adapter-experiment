@@ -6,21 +6,22 @@ class ActiveSymbolsStore {
         this.activeSymbolsData = null;
     }
 
-    async request(onDataHandler) {
+    async request(contractType, onDataHandler) {
 
         try {
 
             await this.wsClient.waitForConnection();
 
             const payload = {
-                "active_symbols": "brief",
-                "product_type": "basic",
-                
+                active_symbols: "brief",
+                product_type: "basic",
+                contract_type: [contractType]
             };
 
             const response = await this.wsClient.request(payload);
             if (response) {
-                onDataHandler(jsonObjectsToBubbleThings(response));
+                const _data = jsonObjectsToBubbleThings(response["active_symbols"]);
+                onDataHandler(_data);
                 return response;
             }
 
