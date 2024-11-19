@@ -1,14 +1,15 @@
-import jsonObjectsToBubbleThings from "../utils/jsonObjectsToBubbleThings.js";
+import jsonObjectsToBubbleThings from "../../utils/jsonObjectsToBubbleThings.js";
+import { modifyContracts } from "../../utils/modifyContracts.js";
 
 class ContractsForCompanyStore {
-    constructor(wsClient) {
+    constructor(wsClient, authStore) {
         this.wsClient = wsClient;
-        this.data = null;
+        this.authStore = authStore;
     }
     async request(onDataHandler) {
 
         try {
-            await this.wsClient.waitForConnection();
+            await this.authStore.waitForAuthorization();
 
             const _payload = {
                 contracts_for_company: 1,
@@ -17,8 +18,9 @@ class ContractsForCompanyStore {
             const response = await this.wsClient.request(_payload);
 
             if (response) {
-                this.data = response["contracts_for_company"];
-                onDataHandler(jsonObjectsToBubbleThings(this.data));
+                const modifiedData = modifyContracts(response["contracts_for_company"]["available"]);
+                const _data = jsonObjectsToBubbleThings(modifiedData);
+                onDataHandler(_data);
                 return response;
             }
 

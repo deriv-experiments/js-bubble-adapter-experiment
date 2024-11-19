@@ -26,7 +26,7 @@ class DerivData {
         this.balanceStore = new BalanceStore(this.wsClient, this.authStore);
         this.buyContractStore = new BuyContractStore(this.wsClient, this.authStore);
         this.contractsForSymbolStore = new ContractsForSymbolStore(this.wsClient);
-        this.contractsForCompanyStore = new ContractsForCompanyStore(this.wsClient);
+        this.contractsForCompanyStore = new ContractsForCompanyStore(this.wsClient, this.authStore);
 
         // instantiate data streams
         this.proposalStream = new ProposalStream(this.subscription);
