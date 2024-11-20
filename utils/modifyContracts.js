@@ -15,22 +15,23 @@ export const modifyContracts = (data) => {
                 expiry.push({
                     name, unit, max, min
                 });
-                delete curr["expiry_type"];
+                delete curr.expiry_type;
             }
 
             const contract_details = [
                 {
-                    contract_display: curr.contract_display,
+                    contract_display: curr.contract_type in tradeConfig ? tradeConfig[curr.contract_type][curr.barrier_category]?.contract_display : curr.contract_display,
                     contract_type: curr.contract_type,
                     sentiment: curr.sentiment,
                 }
             ];
 
-            delete curr["contract_display"];
-            delete curr["sentiment"];
+            delete curr.contract_display;
+            delete curr.sentiment;
 
             const contractData = {
                 ...curr,
+                contract_category_display: curr.contract_type in tradeConfig ? tradeConfig[curr.contract_type][curr.barrier_category]?.contract_category_display : curr.contract_category_display,
                 contract_details,
                 expiry
             };
@@ -46,13 +47,13 @@ export const modifyContracts = (data) => {
                 const expiry = {
                     name, unit, max, min
                 }
-                delete curr["expiry_type"];
+                delete curr.expiry_type;
 
                 acc[i].expiry.push(expiry)
             }
 
             acc[i].contract_details.push({
-                contract_display: curr.contract_display,
+                contract_display: curr.contract_type in tradeConfig ? tradeConfig[curr.contract_type][curr.barrier_category]?.contract_display : curr.contract_display,
                 contract_type: curr.contract_type,
                 sentiment: curr.sentiment,
             });
@@ -60,21 +61,8 @@ export const modifyContracts = (data) => {
 
         return acc;
 
-    }, [])
-
-    const modifiedContracts = combinedContracts.map(item => {
-        if (item.contract_type in tradeConfig) {
-            item = {
-                ...item,
-                contract_category_display: tradeConfig[item.contract_type][item.barrier_category].contract_category_display,
-                contract_display: tradeConfig[item.contract_type][item.barrier_category].contract_display
-            }
-        }
-
-        return item;
-    });
+    }, []);
 
 
-
-    return modifiedContracts;
+    return combinedContracts;
 };
