@@ -44,7 +44,7 @@ class Subscription {
         }
     }
 
-    async subscribe(streamType, payload, onMessageHandler) {
+    async subscribe(streamType, payload, onDataHandler, onErrorHandler) {
         try {
             const _payload = {
                 [streamType]: 1,
@@ -56,10 +56,11 @@ class Subscription {
 
             if (response) {
                 if ("error" in response) {
+                    onErrorHandler(response["error"])
                     throw response["error"];
                 }
                 const subscriptionID = response["subscription"]["id"];
-                this.#addSubscription(streamType, subscriptionID, onMessageHandler);
+                this.#addSubscription(streamType, subscriptionID, onDataHandler);
                 return subscriptionID;
             }
         } catch (error) {
