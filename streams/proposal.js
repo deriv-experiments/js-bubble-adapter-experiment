@@ -5,21 +5,26 @@ class ProposalStream {
         this.subscription = subscription;
     }
 
-    async subscribe(tradeParams, onDataHandler) {
+    async subscribe(tradeParams, onDataHandler, onErrorHandler) {
         try {
             const payload = {
                 ...tradeParams
             };
 
-            const onData = (data) => {
-                const _data = jsonObjectsToBubbleThings(data["proposal"]);
+            const onData = (response) => {
+                const _data = jsonObjectsToBubbleThings(response["proposal"]);
                 onDataHandler(_data);
+            }
+
+            const onError = (error) => {
+                const _error = jsonObjectsToBubbleThings(error);
+                onErrorHandler(_error);
             }
             /* 
                 We do not store the subscriptionID return by subscribe as we
                 unsubscribe to all `proposal` streams at ones.
             */
-            await this.subscription.subscribe("proposal", payload, onData);
+            await this.subscription.subscribe("proposal", payload, onData, onError);
         } catch (error) {
             throw error;
         }
