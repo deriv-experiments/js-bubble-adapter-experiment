@@ -10,6 +10,7 @@ import TicksStream from './streams/ticksStream.js';
 import Forget from './ws/forget.js';
 import Subscription from './ws/subscription.js';
 import WSClient from './ws/ws.js';
+import BalanceStream from './streams/balanceStream.js';
 
 class DerivData {
     constructor() {
@@ -29,6 +30,7 @@ class DerivData {
         this.contractsForCompanyStore = new ContractsForCompanyStore(this.wsClient, this.authStore);
 
         // instantiate data streams
+        this.balanceStream = new BalanceStream(this.subscription, this.authStore);
         this.proposalStream = new ProposalStream(this.subscription);
         this.proposalOpenContractStream = new ProposalOpenContractStream(this.subscription);
         this.ticksStream = new TicksStream(this.subscription);
