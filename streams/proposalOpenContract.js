@@ -5,7 +5,7 @@ class ProposalOpenContractStream {
         this.subscription = subscription;
     }
 
-    async subscribe(contract_id, onDataHandler) {
+    async subscribe(contract_id, onDataHandler, onErrorHandler) {
         try {
             const payload = {
                 contract_id
@@ -15,11 +15,17 @@ class ProposalOpenContractStream {
                 const _data = jsonObjectsToBubbleThings(data["proposal_open_contract"]);
                 onDataHandler(_data);
             }
+
+            const onError = (error) => {
+                const _error = jsonObjectsToBubbleThings(error);
+                onErrorHandler(_error);
+            }
+
             /* 
                 We do not store the subscriptionID return by subscribe as we
                 unsubscribe to all `proposal` streams at ones.
             */
-            await this.subscription.subscribe("proposal_open_contract", payload, onData);
+            await this.subscription.subscribe("proposal_open_contract", payload, onData, onError);
         } catch (error) {
             throw error;
         }

@@ -6,7 +6,7 @@ class BalanceStore {
         this.authStore = authStore;
     }
 
-    async request(onDataHandler) {
+    async request(onDataHandler, onErrorHandler) {
         try {
 
             await this.wsClient.waitForConnection();
@@ -19,6 +19,12 @@ class BalanceStore {
             const response = await this.wsClient.request(payload);
 
             if (response) {
+                if ("error" in response) {
+                    const _error = jsonObjectsToBubbleThings(response["error"]);
+                    onErrorHandler(_error);
+                    throw response["error"];
+                }
+
                 const _data = response["balance"];
                 onDataHandler(jsonObjectsToBubbleThings(_data));
                 return response;

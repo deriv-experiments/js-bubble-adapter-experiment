@@ -6,7 +6,7 @@ class BalanceStream {
         this.authStore = authStore;
     }
 
-    async subscribe(onDataHandler) {
+    async subscribe(onDataHandler, onErrorHandler) {
         try {
 
             await this.authStore.waitForAuthorization();
@@ -16,7 +16,10 @@ class BalanceStream {
                 onDataHandler(_data);
             }
 
-            const onError = () => { };
+            const onError = (error) => {
+                const _error = jsonObjectsToBubbleThings(error);
+                onErrorHandler(_error);
+            }
 
             await this.subscription.subscribe("balance", {}, onData, onError);
         } catch (error) {
