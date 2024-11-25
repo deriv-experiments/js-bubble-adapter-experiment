@@ -63,6 +63,13 @@ export const modifyContracts = (data) => {
 
     }, []);
 
+    const riseFallKey = combinedContracts.findIndex(contract => contract.contract_category_display === 'Rise/Fall');
+    if (riseFallKey !== -1) {
+        const temp = combinedContracts[riseFallKey];
+        combinedContracts[riseFallKey] = combinedContracts[0];
+        combinedContracts[0] = temp;
+    }
+
 
     return combinedContracts;
 };
