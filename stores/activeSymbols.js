@@ -6,7 +6,7 @@ class ActiveSymbolsStore {
         this.activeSymbolsData = null;
     }
 
-    async request(contractType, onDataHandler) {
+    async request(contractType, onDataHandler, onErrorHandler) {
 
         try {
 
@@ -20,6 +20,12 @@ class ActiveSymbolsStore {
 
             const response = await this.wsClient.request(payload);
             if (response) {
+                if ("error" in response) {
+                    const _error = jsonObjectsToBubbleThings(response["error"]);
+                    onErrorHandler(_error);
+                    throw response["error"];
+                }
+
                 const _data = jsonObjectsToBubbleThings(response["active_symbols"]);
                 onDataHandler(_data);
                 return response;
