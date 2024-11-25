@@ -6,7 +6,7 @@ class ContractsForCompanyStore {
         this.wsClient = wsClient;
         this.authStore = authStore;
     }
-    async request(onDataHandler) {
+    async request(onDataHandler, onErrorHandler) {
 
         try {
             await this.authStore.waitForAuthorization();
@@ -18,6 +18,13 @@ class ContractsForCompanyStore {
             const response = await this.wsClient.request(_payload);
 
             if (response) {
+                if ("error" in response) {
+                    const _error = jsonObjectsToBubbleThings(response["error"]);
+                    onErrorHandler(_error);
+                    throw response["error"];
+                }
+
+
                 const modifiedData = modifyContracts(response["contracts_for_company"]["available"]);
                 const _data = jsonObjectsToBubbleThings(modifiedData);
                 onDataHandler(_data);
