@@ -14,7 +14,7 @@ class ContractsForSymbolStore {
         this.wsClient = wsClient;
     }
 
-    async request(currency, selectedSymbol, selectedBarrierCategory, selectedContractCategory, onDataHandler) {
+    async request(currency, selectedSymbol, selectedBarrierCategory, selectedContractCategory, onDataHandler, onErrorHandler) {
 
         try {
             await this.wsClient.waitForConnection();
@@ -28,6 +28,13 @@ class ContractsForSymbolStore {
             const response = await this.wsClient.request(_payload);
 
             if (response) {
+                if ("error" in response) {
+                    const _error = jsonObjectsToBubbleThings(response["error"]);
+                    onErrorHandler(_error);
+                    throw response["error"];
+                }
+
+
                 let contracts = response["contracts_for"]["available"];
                 const _data = getSelectedContractData(contracts, selectedBarrierCategory, selectedContractCategory);
                 onDataHandler(jsonObjectsToBubbleThings(_data));
