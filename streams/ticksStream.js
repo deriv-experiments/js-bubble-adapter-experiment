@@ -7,7 +7,7 @@ class TicksStream {
         this.data = [];
     }
 
-    async subscribe(symbol = "WLDAUD", onDataHandler) {
+    async subscribe(symbol, onDataHandler, onErrorHandler) {
         try {
             const payload = {
                 "ticks": symbol,
@@ -18,7 +18,12 @@ class TicksStream {
                 onDataHandler(this.data);
             };
 
-            const response = await this.subscription.subscribe("ticks", payload, onData);
+            const onError = (error) => {
+                const _error = jsonObjectsToBubbleThings(error);
+                onErrorHandler(_error);
+            }
+
+            const response = await this.subscription.subscribe("ticks", payload, onData, onError);
 
             this.currentSubscriptionID = response;
         } catch (error) {
